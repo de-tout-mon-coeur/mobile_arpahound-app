@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arpahound-server-deployment
+  labels:
+    app: arpahound-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: arpahound-server
+  template:
+    metadata:
+      labels:
+        app: arpahound-server
+    spec:
+      hostNetwork: true
+      containers:
+      - name: arpahound-server-c
+        image: arpahound-server-c:latest
+        imagePullPolicy: Never # Or "IfNotPresent" if you might push to a local registry
+        ports:
+        - containerPort: 8000
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "NET_RAW"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arpahound-server-service
+spec:
+  selector:
+    app: arpahound-server
+  type: NodePort
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: 30800
